@@ -1,107 +1,109 @@
-program SistemLogin;
+program SistemLoginSederhana;
 uses crt;
 
 type
-  PUser = ^TUser;
-  TUser = record
-    username : string;
-    password : string;
-    next : PUser;
+  PData = ^TData;
+  TData = record
+    nama : string;
+    sandi : string;
+    next : PData;
   end;
 
 var
-  head, newNode, temp : PUser;
-  pilihan : integer;
-  inputUser, inputPass : string;
-  loginBerhasil : boolean;
-  salahLogin : integer;
+  awal, baru, bantu : PData;
+  menu : integer;
+  inputNama, inputSandi : string;
+  berhasil : boolean;
+  salah : integer;
 
-
-function cekLogin(u, p : string) : boolean;
+{ ========== CEK LOGIN ========== }
+function cekLogin(nama, sandi : string) : boolean;
 begin
+  bantu := awal;
   cekLogin := false;
-  temp := head;
 
-  while temp <> nil do
+  while bantu <> nil do
   begin
-    if (temp^.username = u) and (temp^.password = p) then
+    if (bantu^.nama = nama) and (bantu^.sandi = sandi) then
     begin
       cekLogin := true;
       exit;
     end;
-    temp := temp^.next;
+    bantu := bantu^.next;
   end;
 end;
 
-
+{ ========== PROSES LOGIN ========== }
 procedure login;
 var
   i : integer;
 begin
-  salahLogin := 0;
+  salah := 0;
 
   repeat
     clrscr;
-    write('Username: ');
-    readln(inputUser);
-    write('Password: ');
-    readln(inputPass);
+    write('Masukkan Username: ');
+    readln(inputNama);
+    write('Masukkan Password: ');
+    readln(inputSandi);
 
-    loginBerhasil := cekLogin(inputUser, inputPass);
+    berhasil := cekLogin(inputNama, inputSandi);
 
-    if loginBerhasil = true then
+    if berhasil then
     begin
-      writeln('Login berhasil! Selamat datang ', inputUser);
+      writeln('Login berhasil!');
+      writeln('Selamat datang, ', inputNama);
       readln;
       exit;
     end
     else
     begin
-      salahLogin := salahLogin + 1;
-      writeln('Username atau password salah');
-      writeln('Percobaan ke-', salahLogin);
+      salah := salah + 1;
+      writeln('Login gagal! Percobaan ke-', salah);
       readln;
     end;
 
-  
-    if salahLogin = 3 then
+    { ========== COOLDOWN 30 DETIK ========== }
+    if salah = 3 then
     begin
       clrscr;
-      writeln('Anda salah 3 kali!');
-      writeln('Silakan tunggu 30 detik...');
+      writeln('Anda gagal 3 kali!');
+      writeln('Tunggu 30 detik...');
 
       for i := 30 downto 1 do
       begin
         gotoxy(1,5);
-        write('Countdown: ', i, ' detik   ');
+        write('Countdown: ', i, ' detik');
         delay(1000);
       end;
 
-      salahLogin := 0;
+      salah := 0;
     end;
 
   until false;
 end;
 
-
-procedure daftarAkun;
+{ ========== DAFTAR AKUN ========== }
+procedure daftar;
 begin
   clrscr;
-  new(newNode);
-  write('Buat Username: ');
-  readln(newNode^.username);
-  write('Buat Password: ');
-  readln(newNode^.password);
-  newNode^.next := nil;
+  new(baru);
 
-  if head = nil then
-    head := newNode
+  write('Buat Username: ');
+  readln(baru^.nama);
+  write('Buat Password: ');
+  readln(baru^.sandi);
+
+  baru^.next := nil;
+
+  if awal = nil then
+    awal := baru
   else
   begin
-    temp := head;
-    while temp^.next <> nil do
-      temp := temp^.next;
-    temp^.next := newNode;
+    bantu := awal;
+    while bantu^.next <> nil do
+      bantu := bantu^.next;
+    bantu^.next := baru;
   end;
 
   writeln;
@@ -111,35 +113,34 @@ begin
   login;
 end;
 
-
+{ ========== MENU UTAMA ========== }
 procedure menuUtama;
 begin
   repeat
     clrscr;
-    writeln('=== SISTEM LOGIN ===');
-    writeln('1. Sudah punya akun (Login)');
-    writeln('2. Buat akun baru (Register)');
+    writeln('=== SISTEM LOGIN SEDERHANA ===');
+    writeln('1. Login');
+    writeln('2. Daftar');
     writeln('3. Keluar');
     write('Pilih menu: ');
-    readln(pilihan);
+    readln(menu);
 
-    case pilihan of
+    case menu of
       1: login;
-      2: daftarAkun;
-      3: writeln('Terima kasih telah menggunakan aplikasi.');
+      2: daftar;
+      3: writeln('Terima kasih!');
     else
       writeln('Menu tidak tersedia!');
     end;
 
     writeln;
-    writeln('Tekan ENTER untuk melanjutkan...');
+    writeln('Tekan ENTER...');
     readln;
-  until pilihan = 3;
+  until menu = 3;
 end;
 
-
+{ ========== PROGRAM UTAMA ========== }
 begin
-  clrscr;
-  head := nil;
+  awal := nil;
   menuUtama;
 end.
